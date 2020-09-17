@@ -1,0 +1,87 @@
+#define PI 3.1415926535897932384626433832795
+
+float jointAngles[3];
+float endEffectorPos[3];
+int L1 = 6;
+int L2 = 8;
+int L3 = 8;
+int L4 = 6;
+
+
+void calc_FK(float jointAngles[])
+{
+  float d1,d2,d3,th5,th6;
+  float rad = (PI/180);
+  int L1 = 6;
+  int L2 = 8;
+  int L3 = 8;
+  int L4 = 6;
+  float th1 = jointAngles[0];
+  float th2 = jointAngles[1];
+  float th3 = jointAngles[2];
+  th5 = 180 - 90 - th2;
+  th6 = 180 + th3 - th5;
+  d1 = L2*sin(th2*rad);
+  d2 = L3*cos(th6*rad);
+  d3 = L2*cos(th2*rad) + L3*sin(th6*rad) + L4;
+
+  
+  endEffectorPos[2] = L1 + d1 - d2;
+  endEffectorPos[1] = d3*sin(th1*rad);
+  endEffectorPos[0] = d3*cos(th1*rad);
+}
+
+void calc_IK(float endEffectorPos[])
+{
+  float d, r1, r2, r3;
+  float phi1, phi2, phi3;
+  float deg = (180/PI);
+
+  float x = endEffectorPos[0];
+  float y = endEffectorPos[1];
+  float z = endEffectorPos[2];
+
+  d = sqrt(x*x + y*y);
+  r2 = d - L4;
+  r1 = z - L1;
+  r3 = sqrt(r1*r1 + r2*r2);
+  phi3 = acos((L2*L2 + L3*L3 - r3*r3)/(2*L2*L3));
+  phi2 = asin(L3* (sin(phi3))/(r3));
+  phi1 = atan(r1/r2);
+  jointAngles[0] = atan(y/x) * deg;
+  jointAngles[1] = (phi1 + phi2) * deg;
+  jointAngles[2] = phi3*deg - 180;
+}
+
+void setup()
+{
+  //Code here:
+
+    
+    
+  Serial.begin(9600);
+  
+  //Calc FK
+  //jointAngles[0] = 60; //th1
+  //jointAngles[1] = 45; //th2
+  //jointAngles[2] = -90; //th3
+  
+  //calc_FK(jointAngles);
+  
+  //Serial.println(endEffectorPos[0]);
+  //Serial.println(endEffectorPos[1]);
+  //Serial.println(endEffectorPos[2]);
+  //Calc IK
+  endEffectorPos[0] = 10; //x
+  endEffectorPos[1] = 14; //y
+  endEffectorPos[2] = 8; //z
+  
+  calc_IK(endEffectorPos);
+  
+  Serial.println(jointAngles[0]);
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+}
+
+void loop()
+{}
