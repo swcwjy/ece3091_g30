@@ -1,12 +1,41 @@
+//#include <VarSpeedServo.h>
+
+#include <TFT.h>
+#include <math.h>
+#include <stdio.h>
 #define PI 3.1415926535897932384626433832795
+#include "VarSpeedServo.h"
+//#include "VarSpeedServo.cpp"
 
 float jointAngles[3];
 float endEffectorPos[3];
-int L1 = 6;
-int L2 = 8;
-int L3 = 8;
-int L4 = 6;
+const int L1 = 6;
+const int L2 = 8;
+const int L3 = 8;
+const int L4 = 6;
 
+const int colourSense = 0; // analogue input for colour sensor
+const int locator = 1; // analogue input for locator
+//int endEffectorPos[2]; //
+
+// Default servo positions (angles)
+const int pos1= 90;
+const int pos2 = 90;
+const int pos3 = 90;
+const int pos4 = 90;
+
+// servo motors
+VarSpeedServo servo1;
+VarSpeedServo servo2;
+VarSpeedServo servo3;
+VarSpeedServo servo4;
+
+
+// input values from pots
+int inputVal1;
+int inputVal2;
+int inputVal3;
+int inputVal4;
 
 void calc_FK(float jointAngles[])
 {
@@ -29,6 +58,8 @@ void calc_FK(float jointAngles[])
   endEffectorPos[2] = L1 + d1 - d2;
   endEffectorPos[1] = d3*sin(th1*rad);
   endEffectorPos[0] = d3*cos(th1*rad);
+  
+ 
 }
 
 void calc_IK(float endEffectorPos[])
@@ -48,19 +79,24 @@ void calc_IK(float endEffectorPos[])
   phi3 = acos((L2*L2 + L3*L3 - r3*r3)/(2*L2*L3));
   phi2 = asin(L3* (sin(phi3))/(r3));
   phi1 = atan(r1/r2);
-  jointAngles[0] = atan(y/x) * deg;
-  jointAngles[1] = (phi1 + phi2) * deg;
-  jointAngles[2] = phi3*deg - 180;
+
+  if(x<0){jointAngles[0] = atan(y/x)* deg + 180;}else jointAngles[0] = atan(y/x)* deg;     // base
+  jointAngles[1]=(phi1 + phi2) * deg;  // arm  if(y<0){jointAngles[1] = (phi1 + phi2) * deg+180;}else
+  if(z<0){jointAngles[2] = phi3*deg+180;}else jointAngles[2]= phi3*deg;// - 180;       // wrist
+  
+  
 }
 
 void setup()
 {
   //Code here:
-
-    
-    
   Serial.begin(9600);
-  
+  // set up motors 
+  servo1.attach(9); // base motor output
+  servo2.attach(8); // shoulder motor output
+  servo3.attach(7); // elbow motor output
+  servo4.attach(6); //  claw motor output
+    
   //Calc FK
   //jointAngles[0] = 60; //th1
   //jointAngles[1] = 45; //th2
@@ -71,17 +107,142 @@ void setup()
   //Serial.println(endEffectorPos[0]);
   //Serial.println(endEffectorPos[1]);
   //Serial.println(endEffectorPos[2]);
+
   //Calc IK
-  endEffectorPos[0] = 10; //x
-  endEffectorPos[1] = 14; //y
-  endEffectorPos[2] = 8; //z
+
   
-  calc_IK(endEffectorPos);
+ 
+  // code for location
+  pinMode(locator,INPUT);
   
-  Serial.println(jointAngles[0]);
-  Serial.println(jointAngles[1]);
-  Serial.println(jointAngles[2]);
+  // code for colour sensor
+   // resistance of LDR, analogue output
+  //pinMode(colourSense,OUTPUT);
+  
 }
 
 void loop()
-{}
+{
+  int crnt_pos1, crnt_pos2, crnt_pos3, crnt_pos4; // current position
+  float ldr_output;
+
+  
+  
+  
+  // colour detector
+  /*
+  ldr_output = analogRead(A0);
+  ldr_output = ldr_output*5/1023;
+  if(ldr_output>3.9 && ldr_output<=4)
+  {
+    Serial.println("red: ");
+    Serial.println(ldr_output);
+    };
+  if(ldr_output>4.25 && ldr_output<=4.35)
+  {
+    Serial.println("blue: ");
+    Serial.println(ldr_output);
+  };
+  delay(10);
+``*/
+ 
+ 
+  // LOCATION DETECTION
+  
+  // Read in the ADC and convert it to a voltage:
+  /*
+  int proximityADC = analogRead(locator);
+  float proximityV = (float)proximityADC * 5.0 / 1023.0;
+  Serial.println(proximityV);
+  delay(100);
+  */
+  
+  // Limit switches size detection
+  // if switch pressed
+  /*
+  if(digitalRead(10)==LOW){
+    digitalWrite(13,HIGH);
+  }else{
+    digitalWrite(13,LOW);
+  }
+  */
+
+  endEffectorPos[0] = 0; //x
+  endEffectorPos[1] = 0.4; //y
+  endEffectorPos[2] = 5; //z
+  
+  calc_IK(endEffectorPos);
+
+  Serial.println(jointAngles[0]); 
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+  
+  // CONTROL BASE
+  
+  inputVal1 = jointAngles[0];
+  inputVal2 = jointAngles[1];
+  inputVal3 = jointAngles[2];
+  ///*
+  servo1.slowmove(jointAngles[0],10);
+  
+  servo2.slowmove(jointAngles[1],10);
+  
+  servo3.slowmove(jointAngles[2],10);
+  delay(6000);
+
+  
+  
+  // return to default
+  servo1.slowmove(pos1,10);
+  servo2.slowmove(pos2,10);
+  servo3.slowmove(pos3,10);
+  delay(7000);
+  
+  //*/
+
+  
+  
+  // CONTROL SHOULDER
+  ///*
+  
+  
+  //delay(4000);
+  
+  //delay(4000);
+
+ //*/
+  
+ 
+
+  // CONTROL ELBOW
+  ///*
+  
+  
+  //delay(4000);
+  
+  //delay(4000);
+  
+  //servo2.slowmove(jointAngles[2],50);
+  //*/
+
+  // control claw
+  /*
+ 
+  servo4.slowmove(-10,10);
+  delay(4000);
+  servo4.slowmove(pos4,10);
+  delay(4000);
+  */
+  /*
+   for(pos4=90;pos4>=5;pos4-=1){
+    servo4.slowmove(pos4,80);
+    delay(15);
+  }
+  for (pos4 = 5; pos4 <= 90; pos4 += 1) {
+    // tell servo to go to position in variable 'pos'
+    servo4.slowmove(pos4,80);
+    // wait 15 ms for servo to reach the position
+    delay(15); // Wait for 15 millisecond(s)
+  }
+  */
+  }
