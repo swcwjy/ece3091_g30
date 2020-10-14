@@ -1,3 +1,5 @@
+
+
 //#include <VarSpeedServo.h>
 
 #include <TFT.h>
@@ -80,9 +82,27 @@ void calc_IK(float endEffectorPos[])
   phi2 = asin(L3* (sin(phi3))/(r3));
   phi1 = atan(r1/r2);
 
-  if(x<0){jointAngles[0] = atan(y/x)* deg + 180;}else jointAngles[0] = atan(y/x)* deg;     // base
-  jointAngles[1]=(phi1 + phi2) * deg;  // arm  if(y<0){jointAngles[1] = (phi1 + phi2) * deg+180;}else
-  if(z<0){jointAngles[2] = phi3*deg+180;}else jointAngles[2]= phi3*deg;// - 180;       // wrist
+  // base
+  if(x<0 && y!=0){jointAngles[0] = atan(y/x)* deg + 180;}
+  else if((y == 0 && x>0)|| (x ==0&&y>0)) {jointAngles[0] = 90-atan(x)* deg;}  
+  else if((y == 0 && x<0) || (x ==0&&y<0)) {jointAngles[0] = atan(-x)* deg+90;}  
+  else if(y==0 && x==0) {jointAngles[0] = 90;}
+  else jointAngles[0] = atan(y/x)* deg;
+
+  //shoulder
+  //if(y <0 || z < 0){jointAngles[1] = (phi1 + phi2) * deg+180;}
+  //else if(y<0){jointAngles[1]=(phi1 + phi2) * deg;}    
+  //else 
+  if(y==0 && x==0 && z ==0){jointAngles[1] = 90;}
+  else jointAngles[1] = -(phi1 + phi2) * deg;
+
+  // elbow
+  //if(z<0 || y <0){jointAngles[2] = phi3*deg + 90;}
+  //if(z<0 || y <0){jointAngles[2] = phi3*deg + 90;}
+  //else 
+  if(y==0 && x==0 && z ==0){jointAngles[2] = 90;}
+  else jointAngles[2]= phi3*deg; //
+        
   
   
 }
@@ -146,7 +166,6 @@ void loop()
   delay(10);
 ``*/
  
- 
   // LOCATION DETECTION
   
   // Read in the ADC and convert it to a voltage:
@@ -168,8 +187,8 @@ void loop()
   */
 
   endEffectorPos[0] = 0; //x
-  endEffectorPos[1] = 0.4; //y
-  endEffectorPos[2] = 5; //z
+  endEffectorPos[1] = -0.1; //y
+  endEffectorPos[2] = 0; //z
   
   calc_IK(endEffectorPos);
 
@@ -177,28 +196,32 @@ void loop()
   Serial.println(jointAngles[1]);
   Serial.println(jointAngles[2]);
   
-  // CONTROL BASE
-  
-  inputVal1 = jointAngles[0];
-  inputVal2 = jointAngles[1];
-  inputVal3 = jointAngles[2];
   ///*
   servo1.slowmove(jointAngles[0],10);
-  
   servo2.slowmove(jointAngles[1],10);
-  
   servo3.slowmove(jointAngles[2],10);
   delay(6000);
 
-  
+  endEffectorPos[0] = 0; //x
+  endEffectorPos[1] = -1; //y
+  endEffectorPos[2] = 0; //z
+
+  calc_IK(endEffectorPos);
+
+  ///*
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(6000);
   
   // return to default
+  /*
   servo1.slowmove(pos1,10);
   servo2.slowmove(pos2,10);
   servo3.slowmove(pos3,10);
   delay(7000);
   
-  //*/
+  */
 
   
   
@@ -228,7 +251,7 @@ void loop()
   // control claw
   /*
  
-  servo4.slowmove(-10,10);
+  servo4.slowmove(0,10);
   delay(4000);
   servo4.slowmove(pos4,10);
   delay(4000);
