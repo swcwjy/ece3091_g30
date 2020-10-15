@@ -4,8 +4,8 @@
 const int locator = A1; // analogue input for locator
 
 //within void setup 
- // code for location
-  pinMode(locator,INPUT);
+
+pinMode(locator,INPUT);
   
   
 //within void loop
