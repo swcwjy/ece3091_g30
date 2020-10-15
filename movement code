@@ -1,3 +1,5 @@
+
+
 //#include <VarSpeedServo.h>
 
 #include <TFT.h>
@@ -15,7 +17,7 @@ const int L3 = 8;
 const int L4 = 6;
 
 const int colourSense = 0; // analogue input for colour sensor
-const int locator = 1; // analogue input for locator
+const int locator = A1; // analogue input for locator
 //int endEffectorPos[2]; //
 
 // Default servo positions (angles)
@@ -55,9 +57,9 @@ void calc_FK(float jointAngles[])
   d3 = L2*cos(th2*rad) + L3*sin(th6*rad) + L4;
 
   
-  endEffectorPos[2] = L1 + d1 - d2;
-  endEffectorPos[1] = d3*sin(th1*rad);
-  endEffectorPos[0] = d3*cos(th1*rad);
+  endEffectorPos[2] = L1 + d1 - d2;   // y
+  endEffectorPos[1] = d3*sin(th1*rad); // z
+  endEffectorPos[0] = d3*cos(th1*rad); // x
   
  
 }
@@ -65,7 +67,7 @@ void calc_FK(float jointAngles[])
 void calc_IK(float endEffectorPos[])
 {
   float d, r1, r2, r3;
-  float phi1, phi2, phi3;
+  float phi1, phi2, phi3; // 
   float deg = (180/PI);
 
   float x = endEffectorPos[0];
@@ -80,9 +82,39 @@ void calc_IK(float endEffectorPos[])
   phi2 = asin(L3* (sin(phi3))/(r3));
   phi1 = atan(r1/r2);
 
-  if(x<0){jointAngles[0] = atan(y/x)* deg + 180;}else jointAngles[0] = atan(y/x)* deg;     // base
-  jointAngles[1]=(phi1 + phi2) * deg;  // arm  if(y<0){jointAngles[1] = (phi1 + phi2) * deg+180;}else
-  if(z<0){jointAngles[2] = phi3*deg+180;}else jointAngles[2]= phi3*deg;// - 180;       // wrist
+
+  
+  
+  // base
+  if(x<0 && y!=0){jointAngles[0] = atan(y/x)* deg + 180;}
+  else if((y == 0 && x>0)|| (x ==0&&y>0)) {jointAngles[0] = 90-atan(x)* deg;}  
+  else if((y == 0 && x<0) || (x ==0&&y<0)) {jointAngles[0] = atan(-x)* deg+90;}  
+  else if((y==0 && x==0) || x==0) {jointAngles[0] = 90;}
+  else jointAngles[0] = atan(y/x)* deg;
+
+  //shoulder and elbow
+  /*
+  if(y==0 && z ==0)
+  {
+    jointAngles[1] = 90;
+    jointAngles[2] = 90;
+  }
+  if(y <0 )
+  {
+    jointAngles[1] =  -(phi1 + phi2) * deg +90;
+    jointAngles[2]= phi3*deg ;
+  }
+  
+  else if(z<0 )
+  {
+    jointAngles[1] = (phi1 + phi2) * deg ;
+    jointAngles[2] = phi3*deg ;
+  }
+  
+  */
+  
+  jointAngles[1] = (phi1 + phi2) * deg;//
+  jointAngles[2]= (phi3+phi1)*deg; 
   
   
 }
@@ -117,7 +149,7 @@ void setup()
   
   // code for colour sensor
    // resistance of LDR, analogue output
-  //pinMode(colourSense,OUTPUT);
+  pinMode(colourSense,OUTPUT);
   
 }
 
@@ -143,9 +175,8 @@ void loop()
     Serial.println("blue: ");
     Serial.println(ldr_output);
   };
-  delay(10);
-``*/
- 
+  delay(100);
+  */
  
   // LOCATION DETECTION
   
@@ -167,38 +198,176 @@ void loop()
   }
   */
 
-  endEffectorPos[0] = 0; //x
-  endEffectorPos[1] = 0.4; //y
-  endEffectorPos[2] = 5; //z
+  // determining workspace
+  /*
+  servo4.slowmove(0.01,20);
+  delay(4000);
+  servo1.slowmove(45+90,10);
+  servo2.slowmove(90,10);
+  servo3.slowmove(90,10);
+  delay(8000);
   
-  calc_IK(endEffectorPos);
+  */
 
-  Serial.println(jointAngles[0]); 
-  Serial.println(jointAngles[1]);
-  Serial.println(jointAngles[2]);
+  // Lab2 Forward kinematics b)
+  // enter angles
+  /*
+  jointAngles[0] = 90; //th1
+  jointAngles[1] = 90; //th2
+  jointAngles[2] = 90; //th3
   
-  // CONTROL BASE
+  calc_FK(jointAngles);
   
-  inputVal1 = jointAngles[0];
-  inputVal2 = jointAngles[1];
-  inputVal3 = jointAngles[2];
-  ///*
   servo1.slowmove(jointAngles[0],10);
-  
   servo2.slowmove(jointAngles[1],10);
-  
   servo3.slowmove(jointAngles[2],10);
   delay(6000);
 
+  Serial.println(endEffectorPos[0]);
+  Serial.println(endEffectorPos[1]);
+  Serial.println(endEffectorPos[2]);
+  */
+
+  
+  // Drawing a horizontal line
+  /*
+  servo4.slowmove(0,20);
+ 
+  for(int x = -5; x<5; x ++)
+  {
+    endEffectorPos[0] = x;
+    endEffectorPos[1] = 10; //z
+  endEffectorPos[2] = 5; //y
+  calc_IK(endEffectorPos);
+  Serial.println(jointAngles[0]);
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  
+  for(int x2 = 5; x2>-5;x2 --)
+  {
+    endEffectorPos[0] = x2;
+    endEffectorPos[1] = 10; //z
+  endEffectorPos[2] = 5; //y
+  calc_IK(endEffectorPos);
+  Serial.println(jointAngles[0]);
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  */
+
+  // drawing vertical line
+  /*
+  for(int x = 5; x<10; x ++)
+  {
+    endEffectorPos[0] = 0;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = x; //y
+  calc_IK(endEffectorPos);
+  Serial.println(jointAngles[0]);
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  
+  for(int x2 = 10; x2>5;x2 --)
+  {
+    endEffectorPos[0] = 0;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = x2; //y
+  calc_IK(endEffectorPos);
+  Serial.println(jointAngles[0]);
+  Serial.println(jointAngles[1]);
+  Serial.println(jointAngles[2]);
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  */
+  
+  // drawing a square
+  ///*
+  for(int x = -5; x<5; x ++)
+  {
+    endEffectorPos[0] = x;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = 0; //y
+  calc_IK(endEffectorPos);
+  ;
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  for(int y = 0; y<10; y ++)
+  {
+    endEffectorPos[0] = 5;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = y; //y
+  calc_IK(endEffectorPos);
+ 
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  
+  for(int x2 = 5; x2>-5;x2 --)
+  {
+    endEffectorPos[0] = x2;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = 10; //y
+  calc_IK(endEffectorPos);
   
   
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  
+  
+  for(int y2 = 10; y2>0;y2 --)
+  {
+    endEffectorPos[0] = -5;
+    endEffectorPos[1] = 13; //z
+  endEffectorPos[2] = y2; //y
+  calc_IK(endEffectorPos);
+  
+  
+  servo1.slowmove(jointAngles[0],10);
+  servo2.slowmove(jointAngles[1],10);
+  servo3.slowmove(jointAngles[2],10);
+  delay(300);
+  }
+  //*/
+ 
   // return to default
+  /*
   servo1.slowmove(pos1,10);
   servo2.slowmove(pos2,10);
   servo3.slowmove(pos3,10);
   delay(7000);
   
-  //*/
+  */
 
   
   
@@ -228,10 +397,10 @@ void loop()
   // control claw
   /*
  
-  servo4.slowmove(-10,10);
+  servo4.slowmove(0,20);
   delay(4000);
-  servo4.slowmove(pos4,10);
-  delay(4000);
+  //servo4.slowmove(pos4,10);
+  //delay(4000);
   */
   /*
    for(pos4=90;pos4>=5;pos4-=1){
