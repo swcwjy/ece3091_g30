@@ -1,0 +1,60 @@
+int light, i;
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  digitalWrite(2,HIGH);
+  digitalWrite(3,HIGH);
+  digitalWrite(4,HIGH);
+  delay(500);
+
+  while(light<30){delay(500);light = analogRead(A5);Serial.println(light);}
+  delay(1000);
+  light = analogRead(A5);
+  Serial.println(light);
+//blue = ~50 - 70 , 4
+//green =~150-170 , 3
+//red = ~100-120 , 2
+// nothing < 30
+
+  switch(light)
+  {
+    case 50 ... 70: //blue
+    digitalWrite(2,LOW);
+    digitalWrite(3,LOW);
+    digitalWrite(4,HIGH);  
+    while(light>50){light = analogRead(A5);Serial.println(light); delay(500);}
+    break;
+    
+    case 120 ... 170: //green
+    digitalWrite(2,LOW);
+    digitalWrite(3,HIGH);
+    digitalWrite(4,LOW);  
+    while(light>50){light = analogRead(A5);Serial.println(light); delay(500);}
+    break;
+    break;
+    
+    case 90 ... 110: //red
+     digitalWrite(2,HIGH);
+    digitalWrite(3,LOW);
+    digitalWrite(4,LOW);  
+    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
+    break;
+    
+    
+    default:  
+    break;
+  }
+  //calibrate
+  //digitalWrite(2,HIGH);
+  //digitalWrite(3,HIGH);
+  //digitalWrite(4,HIGH);
+  //delay(500);
+  //light = analogRead(A5);
+  //Serial.println(light);
+  
+}
