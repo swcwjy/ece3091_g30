@@ -1,60 +1,132 @@
 int light, i;
+int light_arr[8];
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   
 }
+void swap(int *p,int *q) {
+   int t;
+   
+   t=*p; 
+   *p=*q; 
+   *q=t;
+}
 
+void sort(int a[],int n) { 
+   int i,j,temp;
+
+   for(i = 0;i < n-1;i++) {
+      for(j = 0;j < n-i-1;j++) {
+         if(a[j] > a[j+1])
+            swap(&a[j],&a[j+1]);
+      }
+   }
+}
 void loop() {
   // put your main code here, to run repeatedly:
   digitalWrite(2,HIGH);
   digitalWrite(3,HIGH);
   digitalWrite(4,HIGH);
   delay(500);
+  int median;
+  while(light>870){delay(300);light = analogRead(A5);Serial.println(light);}
 
-  while(light<30){delay(500);light = analogRead(A5);Serial.println(light);}
-  delay(1000);
+  // delay the reading of the light
+  for(int i  = 0 ; i<3 ; i++)
+  {
   light = analogRead(A5);
   Serial.println(light);
+  delay(1000);
+
+  // taking 8 samples of light 
+  }
+  for(int i  = 0 ; i<8 ; i++)
+  {
+  light = analogRead(A5);
+  light_arr[i] = light;
+  Serial.println(light);
+  delay(300);
+  }
 //blue = ~50 - 70 , 4
-//green =~150-170 , 3
-//red = ~100-120 , 2
+//green =~120-170 , 3
+//red = ~90-110 , 2
 // nothing < 30
 
-  switch(light)
+  // taking median of light voltages
+  median = 8;
+  sort(light_arr,median);
+  
+  median = (median + 1)/2-1;
+  Serial.print("Median: ");
+  Serial.println(light_arr[median]);
+  
+  switch(light_arr[median])
   {
-    case 50 ... 70: //blue
-    digitalWrite(2,LOW);
+    case  550 ... 659: //blue
+    digitalWrite(2,LOW);  
     digitalWrite(3,LOW);
     digitalWrite(4,HIGH);  
-    while(light>50){light = analogRead(A5);Serial.println(light); delay(500);}
+    while(light<870){light = analogRead(A5);Serial.println(light); delay(300);}
+//    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
     break;
     
-    case 120 ... 170: //green
+    case 700 ... 790: //green
     digitalWrite(2,LOW);
     digitalWrite(3,HIGH);
     digitalWrite(4,LOW);  
-    while(light>50){light = analogRead(A5);Serial.println(light); delay(500);}
-    break;
+    while(light<870){light = analogRead(A5);Serial.println(light); delay(300);}
+//    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
+    
     break;
     
-    case 90 ... 110: //red
+    case 660 ... 699: //red
      digitalWrite(2,HIGH);
     digitalWrite(3,LOW);
     digitalWrite(4,LOW);  
-    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
+    while(light<870){light = analogRead(A5); Serial.println(light);delay(300);}
+//    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
     break;
     
     
     default:  
     break;
   }
-  //calibrate
-  //digitalWrite(2,HIGH);
-  //digitalWrite(3,HIGH);
-  //digitalWrite(4,HIGH);
-  //delay(500);
-  //light = analogRead(A5);
-  //Serial.println(light);
-  
+//  if(12<light<15)
+//  {
+//   digitalWrite(2,LOW);
+//   digitalWrite(3,LOW);
+//   digitalWrite(4,HIGH);  
+//   
+//   while(light  >10)
+//   {
+//    light = analogRead(A5);
+//    Serial.println(light); 
+//   }
+//   
+//  }
+//   else if(<light<35)
+//  {
+//   digitalWrite(2,LOW);
+//   digitalWrite(3,LOW);
+//   digitalWrite(4,HIGH);  
+//   
+//   while(light>10)
+//   {
+//    light = analogRead(A5);
+//    Serial.println(light); 
+//   }
+//   
+//  }
+//  digitalWrite(2,LOW);
+//  delay(500);
+//  digitalWrite(3,HIGH);
+//  delay(500);
+//  digitalWrite(3,LOW);
+//  delay(500);
+//  digitalWrite(4,HIGH);
+//  delay(500);
+//  digitalWrite(4,LOW);
+//  delay(500);
 }
