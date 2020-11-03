@@ -26,29 +26,29 @@ void sort(int a[],int n) {
 }
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(2,HIGH);
-  digitalWrite(3,HIGH);
-  digitalWrite(4,HIGH);
+  digitalWrite(5,HIGH); //blue
+  digitalWrite(6,HIGH); //green 
+  digitalWrite(7,HIGH); //red
   delay(500);
   int median;
-  while(light>870){delay(300);light = analogRead(A5);Serial.println(light);}
+  while(light>200){delay(1000);light = analogRead(A5);Serial.println(light);}
 
   // delay the reading of the light
   for(int i  = 0 ; i<3 ; i++)
   {
   light = analogRead(A5);
   Serial.println(light);
-  delay(1000);
+  delay(500);
 
   // taking 8 samples of light 
   }
-  for(int i  = 0 ; i<8 ; i++)
-  {
-  light = analogRead(A5);
-  light_arr[i] = light;
-  Serial.println(light);
-  delay(300);
-  }
+//  for(int i  = 0 ; i<8 ; i++)
+//  {
+//  light = analogRead(A5);
+//  light_arr[i] = light;
+//  Serial.println(light);
+//  delay(300);
+//  }
 //blue = ~50 - 70 , 4
 //green =~120-170 , 3
 //red = ~90-110 , 2
@@ -62,30 +62,30 @@ void loop() {
   Serial.print("Median: ");
   Serial.println(light_arr[median]);
   
-  switch(light_arr[median])
+  switch(light)
   {
-    case  550 ... 659: //blue
-    digitalWrite(2,LOW);  
-    digitalWrite(3,LOW);
-    digitalWrite(4,HIGH);  
-    while(light<870){light = analogRead(A5);Serial.println(light); delay(300);}
+    case  50 ... 70: //blue
+    digitalWrite(7,LOW);  
+    digitalWrite(6,LOW);
+    digitalWrite(5,HIGH);  
+    while(light<150){light = analogRead(A5);Serial.println(light); delay(300);}
 //    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
     break;
     
-    case 700 ... 790: //green
-    digitalWrite(2,LOW);
-    digitalWrite(3,HIGH);
-    digitalWrite(4,LOW);  
-    while(light<870){light = analogRead(A5);Serial.println(light); delay(300);}
+    case 120 ... 160: //green
+    digitalWrite(7,LOW);
+    digitalWrite(6,HIGH);
+    digitalWrite(5,LOW);  
+    while(light<150){light = analogRead(A5);Serial.println(light); delay(300);}
 //    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
     
     break;
     
-    case 660 ... 699: //red
-     digitalWrite(2,HIGH);
-    digitalWrite(3,LOW);
-    digitalWrite(4,LOW);  
-    while(light<870){light = analogRead(A5); Serial.println(light);delay(300);}
+    case  80 ... 100: //red
+     digitalWrite(7,HIGH);
+    digitalWrite(6,LOW);
+    digitalWrite(5,LOW);  
+    while(light<150){light = analogRead(A5); Serial.println(light);delay(300);}
 //    while(light>40){light = analogRead(A5); Serial.println(light);delay(500);}
     break;
     
